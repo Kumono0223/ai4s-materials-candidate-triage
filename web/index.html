@@ -2,96 +2,53 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Materials Candidate Triage：可复现的材料组成描述符与透明多目标初筛。">
   <title>Materials Candidate Triage</title>
   <style>
-    :root { color-scheme: dark; --bg:#07111d; --panel:#0d1d2e; --line:#21374c; --ink:#e7f5ff; --muted:#93adc2; --cyan:#60d9e7; --lime:#a5e06b; }
-    * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; font:16px/1.55 Inter,system-ui,sans-serif; color:var(--ink); background:radial-gradient(circle at 80% 0,#123852 0,transparent 38%),var(--bg); }
-    main { width:min(1080px,calc(100% - 32px)); margin:auto; padding:64px 0 80px; }
-    .eyebrow { color:var(--cyan); letter-spacing:.16em; text-transform:uppercase; font-size:.78rem; font-weight:800; }
-    h1 { max-width:790px; margin:.4rem 0 1rem; font-size:clamp(2.5rem,7vw,5.4rem); line-height:.96; letter-spacing:-.055em; }
-    .lede { max-width:720px; color:var(--muted); font-size:1.08rem; }
-    .panel { margin-top:32px; padding:24px; border:1px solid var(--line); border-radius:20px; background:rgba(13,29,46,.88); box-shadow:0 24px 70px rgba(0,0,0,.25); }
-    label { display:block; margin-bottom:8px; color:var(--muted); font-size:.88rem; }
-    .input-row { display:grid; grid-template-columns:1fr auto; gap:12px; }
-    input,button { border:1px solid var(--line); border-radius:12px; font:inherit; }
-    input { width:100%; padding:14px 16px; color:var(--ink); background:#081522; outline:none; }
-    input:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(96,217,231,.12); }
-    button { padding:0 22px; color:#041018; background:var(--cyan); font-weight:800; cursor:pointer; }
-    button:hover { filter:brightness(1.08); }
-    .hint,.notice { color:var(--muted); font-size:.86rem; }
-    .notice { margin-top:14px; padding:12px 14px; border-left:3px solid var(--lime); background:#0a1926; }
-    .error { color:#ff9b9b; }
-    .results { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:18px; }
-    article { padding:18px; border:1px solid var(--line); border-radius:16px; background:#091725; }
-    article h2 { display:flex; justify-content:space-between; gap:12px; margin:0 0 12px; font-size:1.25rem; }
-    .score { color:var(--lime); font-variant-numeric:tabular-nums; }
-    dl { display:grid; grid-template-columns:auto 1fr; gap:6px 12px; margin:0; font-size:.9rem; }
-    dt { color:var(--muted); } dd { margin:0; text-align:right; }
-    .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:14px; }
-    .chip { padding:4px 8px; border:1px solid #2a5167; border-radius:999px; color:#bcecf2; font-size:.75rem; }
-    footer { margin-top:28px; display:flex; justify-content:space-between; gap:16px; color:var(--muted); font-size:.82rem; }
-    @media (max-width:760px) { .results { grid-template-columns:1fr; } .input-row { grid-template-columns:1fr; } button { min-height:48px; } footer { flex-direction:column; } }
+    :root{color-scheme:dark;--bg:#07111d;--panel:#0d1d2e;--line:#21374c;--ink:#e7f5ff;--muted:#93adc2;--cyan:#60d9e7;--lime:#a5e06b;--amber:#f8c76a;--red:#ff9b9b}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;font:15px/1.55 Inter,system-ui,sans-serif;color:var(--ink);background:radial-gradient(circle at 82% 0,#123852 0,transparent 38%),var(--bg)}main{width:min(1160px,calc(100% - 32px));margin:auto;padding:54px 0 80px}.eyebrow{color:var(--cyan);letter-spacing:.16em;text-transform:uppercase;font-size:.78rem;font-weight:800}h1{max-width:900px;margin:.35rem 0 1rem;font-size:clamp(2.7rem,7vw,5.5rem);line-height:.96;letter-spacing:-.055em}.lede{max-width:810px;color:var(--muted);font-size:1.08rem}.trust{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.pill,.chip{padding:5px 9px;border:1px solid #2a5167;border-radius:999px;color:#bcecf2;font-size:.75rem}.panel{margin-top:28px;padding:24px;border:1px solid var(--line);border-radius:20px;background:rgba(13,29,46,.9);box-shadow:0 24px 70px #0004}.controls{display:grid;grid-template-columns:1.4fr .65fr auto;gap:12px;align-items:end}label{display:block;margin-bottom:7px;color:var(--muted);font-size:.86rem}input,select,button{width:100%;min-height:48px;border:1px solid var(--line);border-radius:12px;font:inherit}input,select{padding:12px 14px;color:var(--ink);background:#081522;outline:none}input:focus,select:focus,button:focus-visible{border-color:var(--cyan);box-shadow:0 0 0 3px #60d9e71f;outline:0}button{padding:0 20px;color:#041018;background:var(--cyan);font-weight:800;cursor:pointer}button:hover{filter:brightness(1.08)}.secondary{margin-top:10px;color:var(--ink);background:#13283a}.hint,.status,.notice{color:var(--muted);font-size:.84rem}.status{min-height:22px}.notice{margin-top:14px;padding:12px 14px;border-left:3px solid var(--lime);background:#0a1926}.error{color:var(--red)}.results{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px}article{padding:18px;border:1px solid var(--line);border-radius:16px;background:#091725}article header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}article h2{margin:0;font-size:1.34rem}.canonical{display:block;color:var(--muted);font-size:.75rem;font-weight:400}.score{text-align:right;color:var(--lime);font-size:1.7rem;font-weight:800;font-variant-numeric:tabular-nums}.band{display:block;color:var(--muted);font-size:.68rem}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:14px 0}.metric{padding:9px;border:1px solid var(--line);border-radius:10px;background:#07121e;text-align:center}.metric b{display:block;color:#dff7ff}.metric span{color:var(--muted);font-size:.68rem}.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.chip.warn{border-color:#6c5530;color:var(--amber)}.chip.danger{border-color:#693b45;color:var(--red)}.breakdown{margin-top:13px;border-top:1px solid var(--line);padding-top:10px}.component{display:grid;grid-template-columns:130px 1fr 58px;gap:7px;align-items:center;margin:7px 0;font-size:.72rem}.track{height:7px;border-radius:99px;background:#192b3d;overflow:hidden}.fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--cyan),var(--lime))}.fill.negative{background:linear-gradient(90deg,var(--red),var(--amber))}.value{text-align:right}.meta{margin-top:10px;color:var(--muted);font-size:.72rem}.report{margin-top:18px}details{border-top:1px solid var(--line);padding-top:12px}summary{cursor:pointer;color:#c8e1ef}pre{max-height:360px;overflow:auto;white-space:pre-wrap;word-break:break-word;color:#b9cde0}.hidden{display:none}footer{margin-top:28px;display:flex;justify-content:space-between;gap:16px;color:var(--muted);font-size:.8rem}
+    @media(max-width:840px){.controls{grid-template-columns:1fr}.results{grid-template-columns:1fr}}@media(max-width:560px){.metrics{grid-template-columns:repeat(2,1fr)}.component{grid-template-columns:105px 1fr 48px}footer{flex-direction:column}}
   </style>
 </head>
-<body>
-<main>
-  <div class="eyebrow">AI4S · Reproducible Skill</div>
+<body><main>
+  <div class="eyebrow">AI4S · Composition evidence · Method v2</div>
   <h1>Materials Candidate Triage</h1>
-  <p class="lede">把候选化学式转换为可复现的组成指标、摩尔质量和透明初筛分数。纯前端运行，不上传数据，不把启发式结果包装成实验事实。</p>
+  <p class="lede">解析括号、非整数化学计量和水合物，计算质量/原子分数、组成熵与透明多目标评分。纯前端运行，不上传数据，也不把组成启发式包装成真实性能。</p>
+  <div class="trust"><span class="pill">可复现 JSON</span><span class="pill">逐项分数证据</span><span class="pill">供应风险关注表</span><span class="pill">安全复核标志</span><span class="pill">零网络依赖</span></div>
   <section class="panel" aria-label="材料候选初筛">
-    <label for="formulas">候选化学式（空格或逗号分隔）</label>
-    <div class="input-row">
-      <input id="formulas" value="Fe2O3, Al2O3, LiFePO4" autocomplete="off">
-      <button id="analyze" type="button">分析候选</button>
+    <div class="controls">
+      <div><label for="formulas">候选化学式（逗号分隔）</label><input id="formulas" value="LiFePO4, LiNi0.8Mn0.1Co0.1O2, Na3V2(PO4)3, Fe2O3" autocomplete="off"></div>
+      <div><label for="objective">透明初筛目标</label><select id="objective"><option value="battery">电池组成探索</option><option value="catalysis">催化组成探索</option><option value="low-supply-risk">低供应风险优先</option></select></div>
+      <button id="analyze" type="button">生成证据排序</button>
     </div>
-    <p class="hint">当前可解析常见元素与简单计量数；括号、水合物和电荷写法将在后续版本支持。</p>
-    <div id="message" role="status"></div>
+    <button id="sample" class="secondary" type="button">加载括号/水合物验证样例</button>
+    <button id="download" class="secondary hidden" type="button">下载可复现 JSON</button>
+    <p class="hint">支持元素、非整数计量、嵌套 ()/[] 和中点水合物（如 CuSO4·5H2O）。ASCII 小数点保留给非整数计量。</p>
+    <div id="message" class="status" role="status" aria-live="polite"></div>
     <div id="results" class="results"></div>
-    <div class="notice">限制：分数只用于组成层面的确定性初筛。真实性能必须通过授权数据库、模拟或实验验证。</div>
+    <div class="notice">限制：这里只使用化学式组成。真实性能、稳定性、可合成性、毒性与成本必须通过授权数据库、结构计算、实验和领域专家复核。</div>
+    <details id="report" class="report hidden"><summary>查看方法版本和完整 JSON 证据</summary><pre id="json"></pre></details>
   </section>
-  <footer><span>Deterministic · Offline · Explainable</span><span>AI for Materials / 2026</span></footer>
-</main>
-<script>
-const weights={H:1.008,Li:6.94,B:10.81,C:12.011,N:14.007,O:15.999,F:18.998,Na:22.990,Mg:24.305,Al:26.982,Si:28.085,P:30.974,S:32.06,Cl:35.45,K:39.098,Ca:40.078,Ti:47.867,V:50.942,Cr:51.996,Mn:54.938,Fe:55.845,Co:58.933,Ni:58.693,Cu:63.546,Zn:65.38,Ga:69.723,Ge:72.63,As:74.922,Se:78.971,Br:79.904,Rb:85.468,Sr:87.62,Y:88.906,Zr:91.224,Nb:92.906,Mo:95.95,Ag:107.868,In:114.818,Sn:118.71,I:126.904,Ba:137.327,La:138.905,Ce:140.116,W:183.84,Pt:195.084,Au:196.967};
-const transition=new Set(['Fe','Co','Ni','Mn','Cu','Cr','Ti','V']);
-function parseFormula(formula){
-  const counts={}; let cursor=0; const re=/([A-Z][a-z]?)(\d*(?:\.\d+)?)/g; let match;
-  while((match=re.exec(formula))){
-    if(match.index!==cursor) throw new Error(`${formula}：不支持 ${formula.slice(cursor)}`);
-    const el=match[1]; if(!(el in weights)) throw new Error(`${formula}：未知元素 ${el}`);
-    counts[el]=(counts[el]||0)+(match[2]?Number(match[2]):1); cursor=re.lastIndex;
-  }
-  if(!formula||cursor!==formula.length) throw new Error(`${formula||'空输入'}：化学式无效`);
-  return counts;
-}
-function analyze(formula){
-  const counts=parseFormula(formula); const entries=Object.entries(counts);
-  const mass=entries.reduce((sum,[el,n])=>sum+weights[el]*n,0);
-  const hasTM=entries.some(([el])=>transition.has(el));
-  const tags=[]; if(counts.O)tags.push('含氧'); if(hasTM)tags.push('含过渡金属'); if(counts.Li)tags.push('含锂');
-  const score=(counts.O?.35:0)+(hasTM?.35:0)+(counts.Li?.20:0)+Math.min(.10,entries.length*.02);
-  return {formula,counts,mass,score,tags};
-}
-function render(){
-  const results=document.querySelector('#results'), message=document.querySelector('#message');
-  results.replaceChildren(); message.textContent=''; message.className='';
-  try{
-    const formulas=document.querySelector('#formulas').value.split(/[\s,，]+/).map(x=>x.trim()).filter(Boolean);
-    if(!formulas.length) throw new Error('请输入至少一个候选化学式');
-    formulas.map(analyze).sort((a,b)=>b.score-a.score).forEach(item=>{
-      const card=document.createElement('article');
-      const composition=Object.entries(item.counts).map(([el,n])=>`${el} × ${n}`).join(' · ');
-      card.innerHTML=`<h2><span>${item.formula}</span><span class="score">${item.score.toFixed(2)}</span></h2><dl><dt>摩尔质量</dt><dd>${item.mass.toFixed(3)} g/mol</dd><dt>组成</dt><dd>${composition}</dd></dl><div class="chips">${(item.tags.length?item.tags:['无特定标签']).map(x=>`<span class="chip">${x}</span>`).join('')}</div>`;
-      results.append(card);
-    });
-    message.textContent=`已分析 ${formulas.length} 个候选；按透明启发式分数降序显示。`;
-  }catch(error){ message.textContent=error.message; message.className='error'; }
-}
-document.querySelector('#analyze').addEventListener('click',render);
-document.querySelector('#formulas').addEventListener('keydown',event=>{if(event.key==='Enter')render()});
-render();
-</script>
-</body>
-</html>
+  <footer><span>CIAAW rounded atomic-weight table · composition-only</span><span>AI for Materials / 2026</span></footer>
+</main><script>
+const methodVersion='2026.08-composition-v2';
+const weights={H:1.008,Li:6.94,Be:9.0122,B:10.81,C:12.011,N:14.007,O:15.999,F:18.998,Na:22.990,Mg:24.305,Al:26.982,Si:28.085,P:30.974,S:32.06,Cl:35.45,K:39.098,Ca:40.078,Sc:44.956,Ti:47.867,V:50.942,Cr:51.996,Mn:54.938,Fe:55.845,Co:58.933,Ni:58.693,Cu:63.546,Zn:65.38,Ga:69.723,Ge:72.63,As:74.922,Se:78.971,Br:79.904,Rb:85.468,Sr:87.62,Y:88.906,Zr:91.224,Nb:92.906,Mo:95.95,Ru:101.07,Rh:102.906,Pd:106.42,Ag:107.868,Cd:112.414,In:114.818,Sn:118.71,Sb:121.76,Te:127.6,I:126.904,Cs:132.905,Ba:137.327,La:138.905,Ce:140.116,Pr:140.908,Nd:144.242,Sm:150.36,Eu:151.964,Gd:157.25,Tb:158.925,Dy:162.5,Ho:164.93,Er:167.259,Tm:168.934,Yb:173.045,Lu:174.967,Hf:178.49,Ta:180.948,W:183.84,Re:186.207,Os:190.23,Ir:192.217,Pt:195.084,Au:196.967,Hg:200.592,Tl:204.38,Pb:207.2,Bi:208.98,Th:232.038,U:238.029};
+const transition=new Set(['Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Y','Zr','Nb','Mo','Ru','Rh','Pd','Hf','Ta','W','Re','Os','Ir','Pt']);
+const alkali=new Set(['Li','Na','K']),anion=new Set(['O','F','P','S','N']);
+const watchlist=new Set(['Li','Co','Ni','Ga','Ge','Y','La','Ce','Pr','Nd','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Pt','Pd','Rh','Ir']);
+const safety=new Set(['Be','As','Cd','Hg','Tl','Pb','Th','U']);let lastReport=null;
+const isNumber=x=>x!==''&&Number.isFinite(Number(x));const intersect=(keys,set)=>keys.filter(x=>set.has(x));const setFraction=(atomic,set)=>Object.entries(atomic).reduce((s,[e,x])=>s+(set.has(e)?x:0),0);const clamp=x=>Math.max(0,Math.min(1,x));const fmt=x=>new Intl.NumberFormat('zh-CN',{maximumFractionDigits:4}).format(x);
+function tokenize(text){const re=/([A-Z][a-z]?|\d+(?:\.\d+)?|\.\d+|[()\[\]])/g,tokens=[];let cursor=0,m;while((m=re.exec(text))){if(m.index!==cursor)throw Error(`不支持的写法：${text.slice(cursor)}`);tokens.push(m[0]);cursor=re.lastIndex}if(cursor!==text.length)throw Error(`不支持的写法：${text.slice(cursor)}`);return tokens}
+function parseSequence(tokens,state,closing=null){const counts={},pairs={'(':')','[':']'};while(state.i<tokens.length){const token=tokens[state.i];if(closing&&token===closing){state.i++;return counts}if(token===')'||token===']')throw Error(`意外的闭括号 ${token}`);if(token in pairs){state.i++;const nested=parseSequence(tokens,state,pairs[token]);let multiplier=1;if(state.i<tokens.length&&isNumber(tokens[state.i]))multiplier=Number(tokens[state.i++]);if(multiplier<=0)throw Error('计量数必须为正数');for(const [e,x] of Object.entries(nested))counts[e]=(counts[e]||0)+x*multiplier;continue}if(!/^[A-Z]/.test(token))throw Error(`此处应为元素：${token}`);if(!(token in weights))throw Error(`未知元素 ${token}`);state.i++;let amount=1;if(state.i<tokens.length&&isNumber(tokens[state.i]))amount=Number(tokens[state.i++]);if(amount<=0)throw Error('计量数必须为正数');counts[token]=(counts[token]||0)+amount}if(closing)throw Error(`缺少闭括号 ${closing}`);return counts}
+function parseFormula(formula){const text=formula.replace(/\s/g,'');if(!text)throw Error('化学式不能为空');const totals={};for(let segment of text.split('·')){if(!segment)throw Error('水合物片段不能为空');let coefficient=1,m=segment.match(/^(\d+(?:\.\d+)?)(?=[A-Z\[(])/);if(m){coefficient=Number(m[1]);segment=segment.slice(m[0].length)}const tokens=tokenize(segment),state={i:0},parsed=parseSequence(tokens,state);if(!Object.keys(parsed).length)throw Error('化学式片段不能为空');for(const [e,x] of Object.entries(parsed))totals[e]=(totals[e]||0)+coefficient*x}return totals}
+function amount(x){if(Math.abs(x-1)<1e-9)return'';if(Math.abs(x-Math.round(x))<1e-9)return String(Math.round(x));return Number(x.toFixed(6)).toString()}
+function canonical(counts){const keys=Object.keys(counts),order='C' in counts?['C',...('H' in counts?['H']:[]),...keys.filter(x=>x!=='C'&&x!=='H').sort()]:keys.sort();return order.map(e=>e+amount(counts[e])).join('')}
+function bounded(atomic,set,target){return Math.min(1,setFraction(atomic,set)/target)}
+function profile(objective,atomic,distinct,entropy){const watch=setFraction(atomic,watchlist),safetyElements=intersect(Object.keys(atomic),safety).sort(),meanMass=Object.entries(atomic).reduce((s,[e,x])=>s+x*weights[e],0),diversity=Math.min(1,Math.max(0,(distinct-1)/4));let parts;if(objective==='battery')parts=[['alkali-carrier',.30*bounded(atomic,alkali,.20),'Li/Na/K 原子分数'],['redox-metal',.25*bounded(atomic,transition,.20),'过渡金属原子分数'],['anion-framework',.20*bounded(atomic,anion,.55),'O/F/P/S/N 骨架分数'],['mixing-entropy',.15*entropy,'归一化理想混合熵代理'],['composition-diversity',.10*diversity,'元素种类多样性']];else if(objective==='catalysis')parts=[['transition-metal',.35*bounded(atomic,transition,.20),'过渡金属原子分数'],['heteroatom-framework',.20*bounded(atomic,new Set(['O','N','S','P']),.55),'O/N/S/P 原子分数'],['mixing-entropy',.20*entropy,'归一化理想混合熵代理'],['composition-diversity',.15*diversity,'元素种类多样性'],['mass-efficiency-proxy',.10*(1-Math.min(1,meanMass/200)),'低平均原子质量的小权重代理']];else parts=[['watchlist-avoidance',.45*(1-watch),'非供应风险关注表原子分数'],['safety-review-avoidance',safetyElements.length?0:.25,'未出现配置的安全复核元素'],['mass-efficiency-proxy',.15*(1-Math.min(1,meanMass/200)),'低平均原子质量代理'],['composition-simplicity',.15*(1-Math.min(1,Math.max(0,distinct-2)/5)),'较少元素种类的工艺简化代理']];let score=parts.reduce((s,x)=>s+x[1],0),breakdown=parts.map(([component,contribution,rationale])=>({component,contribution:+contribution.toFixed(6),rationale}));if(objective!=='low-supply-risk'){const penalty=-.12*watch;score+=penalty;breakdown.push({component:'supply-watchlist-penalty',contribution:+penalty.toFixed(6),rationale:'可替换关注表的透明复核惩罚'});if(safetyElements.length){score-=.25;breakdown.push({component:'safety-review-penalty',contribution:-.25,rationale:`需复核：${safetyElements.join(', ')}`})}}return{score:clamp(score),breakdown}}
+function analyzeFormula(formula,objective){const counts=parseFormula(formula),atomTotal=Object.values(counts).reduce((a,b)=>a+b,0),molar=Object.entries(counts).reduce((s,[e,x])=>s+weights[e]*x,0),atomic=Object.fromEntries(Object.entries(counts).map(([e,x])=>[e,x/atomTotal])),mass=Object.fromEntries(Object.entries(counts).map(([e,x])=>[e,weights[e]*x/molar])),entropyRaw=-Object.values(atomic).reduce((s,x)=>s+x*Math.log(x),0),entropy=Object.keys(atomic).length>1?entropyRaw/Math.log(Object.keys(atomic).length):0,{score,breakdown}=profile(objective,atomic,Object.keys(counts).length,entropy),watch=intersect(Object.keys(counts),watchlist).sort(),safe=intersect(Object.keys(counts),safety).sort(),flags=[];if(intersect(Object.keys(counts),transition).length)flags.push('含过渡金属');if(intersect(Object.keys(counts),alkali).length)flags.push('含碱金属载流元素');if(watch.length)flags.push('需供应风险复核');if(safe.length)flags.push('需安全复核');return{formula,canonical_formula:canonical(counts),composition:counts,molar_mass_g_mol:+molar.toFixed(6),atomic_fractions:Object.fromEntries(Object.entries(atomic).map(([e,x])=>[e,+x.toFixed(6)])),mass_fractions:Object.fromEntries(Object.entries(mass).map(([e,x])=>[e,+x.toFixed(6)])),descriptors:{distinct_elements:Object.keys(counts).length,total_atoms_per_formula_unit:+atomTotal.toFixed(6),normalised_mixing_entropy:+entropy.toFixed(6),mean_atomic_mass:+(molar/atomTotal).toFixed(6),oxygen_atomic_fraction:+(atomic.O||0).toFixed(6),transition_metal_atomic_fraction:+setFraction(atomic,transition).toFixed(6),supply_watchlist_atomic_fraction:+setFraction(atomic,watchlist).toFixed(6)},objective,triage_score:+score.toFixed(6),priority_band:score>=.65?'A':score>=.45?'B':'C',score_breakdown:breakdown,flags,supply_watchlist_elements:watch,safety_review_elements:safe,validation_level:'composition-only',methodology_version:methodVersion,limitations:['组成层启发式初筛，不是性能、稳定性、毒性或可合成性预测。','未使用晶体结构、氧化态、相图、工艺、成本或实验条件。','高优先级候选仍必须用授权数据库、模拟和实验验证。']}}
+function make(tag,text,cls=''){const n=document.createElement(tag);n.textContent=text;if(cls)n.className=cls;return n}
+function renderCard(item){const card=document.createElement('article'),head=document.createElement('header'),title=make('h2',item.formula),canonicalText=make('span',`规范式 ${item.canonical_formula}`,'canonical'),score=make('div',item.triage_score.toFixed(3),'score'),band=make('span',`组成优先级 ${item.priority_band}`,'band');title.append(canonicalText);score.append(band);head.append(title,score);card.append(head);const metrics=make('div','','metrics'),metricData=[[fmt(item.molar_mass_g_mol),'g/mol'],[item.descriptors.distinct_elements,'元素数'],[item.descriptors.normalised_mixing_entropy.toFixed(3),'归一化熵'],[(item.descriptors.supply_watchlist_atomic_fraction*100).toFixed(1)+'%','关注表原子分数']];for(const [v,l] of metricData){const box=make('div','','metric');box.append(make('b',String(v)),make('span',l));metrics.append(box)}card.append(metrics);const chips=make('div','','chips');for(const flag of item.flags)chips.append(make('span',flag,'chip '+(flag.includes('安全')?'danger':flag.includes('风险')?'warn':'')));if(!item.flags.length)chips.append(make('span','无配置标志','chip'));card.append(chips);const breakdown=make('div','','breakdown');for(const part of item.score_breakdown){const row=make('div','','component'),label=make('span',part.component),track=make('span','','track'),fill=make('span','','fill '+(part.contribution<0?'negative':'')),value=make('span',(part.contribution>=0?'+':'')+part.contribution.toFixed(3),'value');fill.style.width=`${Math.max(3,Math.min(100,Math.abs(part.contribution)/.45*100))}%`;fill.title=part.rationale;track.append(fill);row.append(label,track,value);breakdown.append(row)}card.append(breakdown,make('div',`方法 ${item.methodology_version} · ${item.validation_level}`,'meta'));return card}
+function render(){const results=document.getElementById('results'),message=document.getElementById('message');results.replaceChildren();message.textContent='';message.className='status';try{const formulas=document.getElementById('formulas').value.split(/[,，\n]+/).map(x=>x.trim()).filter(Boolean),objective=document.getElementById('objective').value;if(!formulas.length)throw Error('请输入至少一个候选化学式');const candidates=formulas.map(x=>analyzeFormula(x,objective)).sort((a,b)=>b.triage_score-a.triage_score||a.canonical_formula.localeCompare(b.canonical_formula)),report={methodology_version:methodVersion,objective,candidate_count:candidates.length,candidates,next_validation:['记录候选来源、公开数据版本和许可。','按目标属性运行结构/第一性原理/机器学习基线，并保留误差与失败样本。','由领域专家审阅供应风险与安全标志，再决定实验优先级。']};for(const item of candidates)results.append(renderCard(item));lastReport=report;document.getElementById('json').textContent=JSON.stringify(report,null,2);document.getElementById('report').classList.remove('hidden');document.getElementById('download').classList.remove('hidden');message.textContent=`已按 ${objective} 目标分析 ${candidates.length} 个候选；最高为 ${candidates[0].formula}（${candidates[0].triage_score.toFixed(3)}）。`}catch(error){message.textContent=error.message;message.className='status error'}}
+document.getElementById('analyze').onclick=render;document.getElementById('sample').onclick=()=>{document.getElementById('formulas').value='Ca3(PO4)2, CuSO4·5H2O, LiNi0.8Mn0.1Co0.1O2, PbO';render()};document.getElementById('formulas').onkeydown=e=>{if(e.key==='Enter')render()};document.getElementById('download').onclick=()=>{if(!lastReport)return;const blob=new Blob([JSON.stringify(lastReport,null,2)],{type:'application/json;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='materials-candidate-triage.json';a.click();URL.revokeObjectURL(a.href)};render();
+</script></body></html>
