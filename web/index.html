@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Materials Candidate Triage</title>
+  <style>
+    :root { color-scheme: dark; --bg:#07111d; --panel:#0d1d2e; --line:#21374c; --ink:#e7f5ff; --muted:#93adc2; --cyan:#60d9e7; --lime:#a5e06b; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font:16px/1.55 Inter,system-ui,sans-serif; color:var(--ink); background:radial-gradient(circle at 80% 0,#123852 0,transparent 38%),var(--bg); }
+    main { width:min(1080px,calc(100% - 32px)); margin:auto; padding:64px 0 80px; }
+    .eyebrow { color:var(--cyan); letter-spacing:.16em; text-transform:uppercase; font-size:.78rem; font-weight:800; }
+    h1 { max-width:790px; margin:.4rem 0 1rem; font-size:clamp(2.5rem,7vw,5.4rem); line-height:.96; letter-spacing:-.055em; }
+    .lede { max-width:720px; color:var(--muted); font-size:1.08rem; }
+    .panel { margin-top:32px; padding:24px; border:1px solid var(--line); border-radius:20px; background:rgba(13,29,46,.88); box-shadow:0 24px 70px rgba(0,0,0,.25); }
+    label { display:block; margin-bottom:8px; color:var(--muted); font-size:.88rem; }
+    .input-row { display:grid; grid-template-columns:1fr auto; gap:12px; }
+    input,button { border:1px solid var(--line); border-radius:12px; font:inherit; }
+    input { width:100%; padding:14px 16px; color:var(--ink); background:#081522; outline:none; }
+    input:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(96,217,231,.12); }
+    button { padding:0 22px; color:#041018; background:var(--cyan); font-weight:800; cursor:pointer; }
+    button:hover { filter:brightness(1.08); }
+    .hint,.notice { color:var(--muted); font-size:.86rem; }
+    .notice { margin-top:14px; padding:12px 14px; border-left:3px solid var(--lime); background:#0a1926; }
+    .error { color:#ff9b9b; }
+    .results { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:18px; }
+    article { padding:18px; border:1px solid var(--line); border-radius:16px; background:#091725; }
+    article h2 { display:flex; justify-content:space-between; gap:12px; margin:0 0 12px; font-size:1.25rem; }
+    .score { color:var(--lime); font-variant-numeric:tabular-nums; }
+    dl { display:grid; grid-template-columns:auto 1fr; gap:6px 12px; margin:0; font-size:.9rem; }
+    dt { color:var(--muted); } dd { margin:0; text-align:right; }
+    .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:14px; }
+    .chip { padding:4px 8px; border:1px solid #2a5167; border-radius:999px; color:#bcecf2; font-size:.75rem; }
+    footer { margin-top:28px; display:flex; justify-content:space-between; gap:16px; color:var(--muted); font-size:.82rem; }
+    @media (max-width:760px) { .results { grid-template-columns:1fr; } .input-row { grid-template-columns:1fr; } button { min-height:48px; } footer { flex-direction:column; } }
+  </style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">AI4S · Reproducible Skill</div>
+  <h1>Materials Candidate Triage</h1>
+  <p class="lede">把候选化学式转换为可复现的组成指标、摩尔质量和透明初筛分数。纯前端运行，不上传数据，不把启发式结果包装成实验事实。</p>
+  <section class="panel" aria-label="材料候选初筛">
+    <label for="formulas">候选化学式（空格或逗号分隔）</label>
+    <div class="input-row">
+      <input id="formulas" value="Fe2O3, Al2O3, LiFePO4" autocomplete="off">
+      <button id="analyze" type="button">分析候选</button>
+    </div>
+    <p class="hint">当前可解析常见元素与简单计量数；括号、水合物和电荷写法将在后续版本支持。</p>
+    <div id="message" role="status"></div>
+    <div id="results" class="results"></div>
+    <div class="notice">限制：分数只用于组成层面的确定性初筛。真实性能必须通过授权数据库、模拟或实验验证。</div>
+  </section>
+  <footer><span>Deterministic · Offline · Explainable</span><span>AI for Materials / 2026</span></footer>
+</main>
+<script>
+const weights={H:1.008,Li:6.94,B:10.81,C:12.011,N:14.007,O:15.999,F:18.998,Na:22.990,Mg:24.305,Al:26.982,Si:28.085,P:30.974,S:32.06,Cl:35.45,K:39.098,Ca:40.078,Ti:47.867,V:50.942,Cr:51.996,Mn:54.938,Fe:55.845,Co:58.933,Ni:58.693,Cu:63.546,Zn:65.38,Ga:69.723,Ge:72.63,As:74.922,Se:78.971,Br:79.904,Rb:85.468,Sr:87.62,Y:88.906,Zr:91.224,Nb:92.906,Mo:95.95,Ag:107.868,In:114.818,Sn:118.71,I:126.904,Ba:137.327,La:138.905,Ce:140.116,W:183.84,Pt:195.084,Au:196.967};
+const transition=new Set(['Fe','Co','Ni','Mn','Cu','Cr','Ti','V']);
+function parseFormula(formula){
+  const counts={}; let cursor=0; const re=/([A-Z][a-z]?)(\d*(?:\.\d+)?)/g; let match;
+  while((match=re.exec(formula))){
+    if(match.index!==cursor) throw new Error(`${formula}：不支持 ${formula.slice(cursor)}`);
+    const el=match[1]; if(!(el in weights)) throw new Error(`${formula}：未知元素 ${el}`);
+    counts[el]=(counts[el]||0)+(match[2]?Number(match[2]):1); cursor=re.lastIndex;
+  }
+  if(!formula||cursor!==formula.length) throw new Error(`${formula||'空输入'}：化学式无效`);
+  return counts;
+}
+function analyze(formula){
+  const counts=parseFormula(formula); const entries=Object.entries(counts);
+  const mass=entries.reduce((sum,[el,n])=>sum+weights[el]*n,0);
+  const hasTM=entries.some(([el])=>transition.has(el));
+  const tags=[]; if(counts.O)tags.push('含氧'); if(hasTM)tags.push('含过渡金属'); if(counts.Li)tags.push('含锂');
+  const score=(counts.O?.35:0)+(hasTM?.35:0)+(counts.Li?.20:0)+Math.min(.10,entries.length*.02);
+  return {formula,counts,mass,score,tags};
+}
+function render(){
+  const results=document.querySelector('#results'), message=document.querySelector('#message');
+  results.replaceChildren(); message.textContent=''; message.className='';
+  try{
+    const formulas=document.querySelector('#formulas').value.split(/[\s,，]+/).map(x=>x.trim()).filter(Boolean);
+    if(!formulas.length) throw new Error('请输入至少一个候选化学式');
+    formulas.map(analyze).sort((a,b)=>b.score-a.score).forEach(item=>{
+      const card=document.createElement('article');
+      const composition=Object.entries(item.counts).map(([el,n])=>`${el} × ${n}`).join(' · ');
+      card.innerHTML=`<h2><span>${item.formula}</span><span class="score">${item.score.toFixed(2)}</span></h2><dl><dt>摩尔质量</dt><dd>${item.mass.toFixed(3)} g/mol</dd><dt>组成</dt><dd>${composition}</dd></dl><div class="chips">${(item.tags.length?item.tags:['无特定标签']).map(x=>`<span class="chip">${x}</span>`).join('')}</div>`;
+      results.append(card);
+    });
+    message.textContent=`已分析 ${formulas.length} 个候选；按透明启发式分数降序显示。`;
+  }catch(error){ message.textContent=error.message; message.className='error'; }
+}
+document.querySelector('#analyze').addEventListener('click',render);
+document.querySelector('#formulas').addEventListener('keydown',event=>{if(event.key==='Enter')render()});
+render();
+</script>
+</body>
+</html>
